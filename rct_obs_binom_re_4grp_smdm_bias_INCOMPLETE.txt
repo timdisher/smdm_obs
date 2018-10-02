@@ -1,0 +1,221 @@
+model
+{
+    for (k in 2:ntCOall) {
+        dRCT[k] ~ dnorm(d[k], tauCO)
+        dObshigh[k] ~ dnorm(d[k], tauCO)
+        dOBSmod[k] ~ dnorm(d[k] + bOBS, tauCO * wwOBS)
+        dOBSlow[k] ~ dnorm(d[k] + bOBSlow, tauCO * wwOBSlow)
+    }
+    for (k in (ntCOall + 1):ntCO3) {
+        dRCThigh[k] ~ dnorm(d[k], tauCO)
+        dObslow[k] ~ dnorm(d[k], tauCO)
+    }
+    for (k in (ntCO3 + 1):nt) {
+        dRCT[k] ~ dnorm(d[k], tauCO)
+        dOBSlow[k] ~ dnorm(d[k], tauCO)
+        dOBS[k] ~ dnorm(d[k], tauCO)
+    }
+    dOBS[3] = 0.00000E+00
+    dOBSlow[3] = 0.00000E+00
+    dRCT[3] = 0.00000E+00
+    totresdev = sum(totresdevRCT, totresdevRCThigh, totresdevOBS, 
+        totresdevOBSlow)
+    d[1] <- 0.00000E+00
+    for (k in 2:nt) {
+        d[k] ~ dnorm(0.00000E+00, 1.00000E-04)
+    }
+    sdCO ~ dunif(0.00000E+00, 2)
+    tauCO <- pow(sdCO, -2)
+    A ~ dnorm(meanA, precA)
+    for (k in 1:nt) {
+        logit(T[k]) <- A + d[k]
+    }
+    for (c in 1:(nt - 1)) {
+        for (k in (c + 1):nt) {
+            or[c, k] <- exp(d[k] - d[c])
+            lor[c, k] <- (d[k] - d[c])
+            better[c, k] <- 1 - step(d[k] - d[c])
+            NNT[c, k] <- 1/(T[k] - T[c] + 1.00000E-08)
+            RD[c, k] <- T[k] - T[c]
+            RR[c, k] <- T[k]/T[c]
+        }
+    }
+    rk <- nt + 1 - rank(d[])
+    for (k in 1:nt) {
+        best[k] <- equals(rk[k], 1)
+        for (h in 1:nt) {
+            prob[k, h] <- equals(rk[k], h)
+        }
+    }
+    for (k in 1:nt) {
+        for (h in 1:nt) {
+            cumeffectiveness[k, h] <- sum(prob[k, 1:h])
+        }
+    }
+    for (i in 1:nt) {
+        SUCRA[i] <- sum(cumeffectiveness[i, 1:(nt - 1)])/(nt - 
+            1)
+    }
+    for (i in 1:nsRCT) {
+        wRCT[i, 1] <- 0.00000E+00
+        deltaRCT[i, 1] <- 0.00000E+00
+        muRCT[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naRCT[i]) {
+            rRCT[i, k] ~ dbin(pRCT[i, k], nRCT[i, k])
+            logit(pRCT[i, k]) <- muRCT[i] + deltaRCT[i, k]
+            rhatRCT[i, k] <- pRCT[i, k] * nRCT[i, k]
+            devRCT[i, k] <- 2 * (rRCT[i, k] * (log(rRCT[i, k]) - 
+                log(rhatRCT[i, k])) + (nRCT[i, k] - rRCT[i, k]) * 
+                (log(nRCT[i, k] - rRCT[i, k]) - log(nRCT[i, k] - 
+                  rhatRCT[i, k])))
+        }
+        resdevRCT[i] <- sum(devRCT[i, 1:naRCT[i]])
+        for (k in 2:naRCT[i]) {
+            deltaRCT[i, k] ~ dnorm(mdRCT[i, k], taudRCT[i, k])
+            mdRCT[i, k] <- dRCT[tRCT[i, k]] - dRCT[tRCT[i, 1]] + 
+                swRCT[i, k]
+            taudRCT[i, k] <- tauRCT * 2 * (k - 1)/k
+            wRCT[i, k] <- (deltaRCT[i, k] - dRCT[tRCT[i, k]] + 
+                dRCT[tRCT[i, 1]])
+            swRCT[i, k] <- sum(wRCT[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+    totresdevRCT <- sum(resdevRCT[])
+    dRCT[1] <- 0.00000E+00
+    tausqRCT ~ dlnorm(-1.69, 0.595)
+    tauRCT <- 1/tausqRCT
+    sdRCT <- sqrt(tausqRCT)
+    for (k in 1:ntRCT) {
+        logit(TRCT[k]) <- A + dRCT[k]
+    }
+    for (c in 1:(ntRCT - 1)) {
+        for (k in (c + 1):ntRCT) {
+            orRCT[c, k] <- exp(dRCT[k] - dRCT[c])
+            lorRCT[c, k] <- (dRCT[k] - dRCT[c])
+            RRRCT[c, k] <- TRCT[k]/TRCT[c]
+        }
+    }
+    for (i in 1:nsRCThigh) {
+        wRCThigh[i, 1] <- 0.00000E+00
+        deltaRCThigh[i, 1] <- 0.00000E+00
+        muRCThigh[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naRCThigh[i]) {
+            rRCThigh[i, k] ~ dbin(pRCThigh[i, k], nRCThigh[i, 
+                k])
+            logit(pRCThigh[i, k]) <- muRCThigh[i] + deltaRCThigh[i, 
+                k]
+            rhatRCThigh[i, k] <- pRCThigh[i, k] * nRCThigh[i, 
+                k]
+            devRCThigh[i, k] <- 2 * (rRCThigh[i, k] * (log(rRCThigh[i, 
+                k]) - log(rhatRCThigh[i, k])) + (nRCThigh[i, 
+                k] - rRCThigh[i, k]) * (log(nRCThigh[i, k] - 
+                rRCThigh[i, k]) - log(nRCThigh[i, k] - rhatRCThigh[i, 
+                k])))
+        }
+        resdevRCThigh[i] <- sum(devRCThigh[i, 1:naRCThigh[i]])
+        for (k in 2:naRCThigh[i]) {
+            deltaRCThigh[i, k] ~ dnorm(mdRCThigh[i, k], taudRCThigh[i, 
+                k])
+            mdRCThigh[i, k] <- dRCThigh[tRCThigh[i, k]] - dRCThigh[tRCThigh[i, 
+                1]] + swRCThigh[i, k]
+            taudRCThigh[i, k] <- tauRCThigh * 2 * (k - 1)/k
+            wRCThigh[i, k] <- (deltaRCThigh[i, k] - dRCThigh[tRCThigh[i, 
+                k]] + dRCThigh[tRCThigh[i, 1]])
+            swRCThigh[i, k] <- sum(wRCThigh[i, 1:(k - 1)])/(k - 
+                1)
+        }
+    }
+    totresdevRCThigh <- sum(resdevRCThigh[])
+    dRCThigh[1] <- 0.00000E+00
+    sdRCThigh ~ dunif(0.3, 0.399)
+    tauRCThigh <- pow(sdRCThigh, -2)
+    for (k in 1:ntRCThigh) {
+        logit(TRCThigh[k]) <- A + dRCThigh[k]
+    }
+    for (c in 1:(ntRCThigh - 1)) {
+        for (k in (c + 1):ntRCThigh) {
+            orRCThigh[c, k] <- exp(dRCThigh[k] - dRCThigh[c])
+            lorRCThigh[c, k] <- (dRCThigh[k] - dRCThigh[c])
+            RRRCThigh[c, k] <- TRCThigh[k]/TRCThigh[c]
+        }
+    }
+    for (i in 1:nsOBS) {
+        wOBS[i, 1] <- 0.00000E+00
+        deltaOBS[i, 1] <- 0.00000E+00
+        muOBS[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naOBS[i]) {
+            rOBS[i, k] ~ dbin(pOBS[i, k], nOBS[i, k])
+            logit(pOBS[i, k]) <- muOBS[i] + deltaOBS[i, k]
+            rhatOBS[i, k] <- pOBS[i, k] * nOBS[i, k]
+            devOBS[i, k] <- 2 * (rOBS[i, k] * (log(rOBS[i, k]) - 
+                log(rhatOBS[i, k])) + (nOBS[i, k] - rOBS[i, k]) * 
+                (log(nOBS[i, k] - rOBS[i, k]) - log(nOBS[i, k] - 
+                  rhatOBS[i, k])))
+        }
+        resdevOBS[i] <- sum(devOBS[i, 1:naOBS[i]])
+        for (k in 2:naOBS[i]) {
+            deltaOBS[i, k] ~ dnorm(mdOBS[i, k], taudOBS[i, k])
+            mdOBS[i, k] <- dOBS[tOBS[i, k]] - dOBS[tOBS[i, 1]] + 
+                swOBS[i, k]
+            taudOBS[i, k] <- tauOBS * 2 * (k - 1)/k
+            wOBS[i, k] <- (deltaOBS[i, k] - dOBS[tOBS[i, k]] + 
+                dOBS[tOBS[i, 1]])
+            swOBS[i, k] <- sum(wOBS[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+    totresdevOBS <- sum(resdevOBS[])
+    dOBS[1] <- 0.00000E+00
+    sdOBS ~ dunif(0.3, 0.399)
+    tauOBS <- pow(sdOBS, -2)
+    for (k in 1:ntOBS) {
+        logit(TOBS[k]) <- A + dOBS[k]
+    }
+    for (c in 1:(ntOBS - 1)) {
+        for (k in (c + 1):ntOBS) {
+            orOBS[c, k] <- exp(dOBS[k] - dOBS[c])
+            lorOBS[c, k] <- (dOBS[k] - dOBS[c])
+            RROBS[c, k] <- TOBS[k]/TOBS[c]
+        }
+    }
+    for (i in 1:nsOBSlow) {
+        wOBSlow[i, 1] <- 0.00000E+00
+        deltaOBSlow[i, 1] <- 0.00000E+00
+        muOBSlow[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naOBSlow[i]) {
+            rOBSlow[i, k] ~ dbin(pOBSlow[i, k], nOBSlow[i, k])
+            logit(pOBSlow[i, k]) <- muOBSlow[i] + deltaOBSlow[i, 
+                k]
+            rhatOBSlow[i, k] <- pOBSlow[i, k] * nOBSlow[i, k]
+            devOBSlow[i, k] <- 2 * (rOBSlow[i, k] * (log(rOBSlow[i, 
+                k]) - log(rhatOBSlow[i, k])) + (nOBSlow[i, k] - 
+                rOBSlow[i, k]) * (log(nOBSlow[i, k] - rOBSlow[i, 
+                k]) - log(nOBSlow[i, k] - rhatOBSlow[i, k])))
+        }
+        resdevOBSlow[i] <- sum(devOBSlow[i, 1:naOBSlow[i]])
+        for (k in 2:naOBSlow[i]) {
+            deltaOBSlow[i, k] ~ dnorm(mdOBSlow[i, k], taudOBSlow[i, 
+                k])
+            mdOBSlow[i, k] <- dOBSlow[tOBSlow[i, k]] - dOBSlow[tOBSlow[i, 
+                1]] + swOBSlow[i, k]
+            taudOBSlow[i, k] <- tauOBSlow * 2 * (k - 1)/k
+            wOBSlow[i, k] <- (deltaOBSlow[i, k] - dOBSlow[tOBSlow[i, 
+                k]] + dOBSlow[tOBSlow[i, 1]])
+            swOBSlow[i, k] <- sum(wOBSlow[i, 1:(k - 1)])/(k - 
+                1)
+        }
+    }
+    totresdevOBSlow <- sum(resdevOBSlow[])
+    dOBSlow[1] <- 0.00000E+00
+    sdOBSlow ~ dunif(0.3, 0.399)
+    tauOBSlow <- pow(sdOBSlow, -2)
+    for (k in 1:ntOBSlow) {
+        logit(TOBSlow[k]) <- A + dOBSlow[k]
+    }
+    for (c in 1:(ntOBSlow - 1)) {
+        for (k in (c + 1):ntOBSlow) {
+            orOBSlow[c, k] <- exp(dOBSlow[k] - dOBSlow[c])
+            lorOBSlow[c, k] <- (dOBSlow[k] - dOBSlow[c])
+            RROBSlow[c, k] <- TOBSlow[k]/TOBSlow[c]
+        }
+    }
+}
