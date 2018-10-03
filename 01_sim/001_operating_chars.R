@@ -3,7 +3,7 @@ library(meta)
 
 start <- Sys.time()
 nsims <- 100
-trt_effect <- 1
+trt_effect <- 1.7
 
 sim_list <- rep(list(NA), nsims)
 for(i in 1:nsims){
@@ -12,19 +12,19 @@ for(i in 1:nsims){
   
   ma_list <- list(
     # Limit to rcts -------------------------------------------------------------- -
-    rcts = naiive(filter = c("rct")),
+    rcts = naiive_ma(filter = c("rct")),
     
     # Include high quality Obs --------------------------------------------------- -
     
-    rcts_high = naiive(filter = c("rct", "obs_high")),
+    rcts_high = naiive_ma(filter = c("rct", "obs_high")),
     
     # Include mod quality obs ---------------------------------------------------- -
     
-    rcts_mod = naiive(filter = c("rct", "obs_high", "obs_mod")),
+    rcts_mod = naiive_ma(filter = c("rct", "obs_high", "obs_mod")),
     
     # Include all quality obs ---------------------------------------------------- -
     
-    rcts_low = naiive(filter = c("rct", "obs_high", "obs_mod", "obs_low"))
+    rcts_low = naiive_ma(filter = c("rct", "obs_high", "obs_mod", "obs_low"))
     
   )
   

@@ -9,7 +9,7 @@ source("./04_functions/smdm_obs_functions.R")
 baseline_p <- 0.05
 trt_effect <- 1.70 # Odds of adverse event is increased by treatment
 bias_rct <- 0 # RCTs are unbiased
-bias_obs_high <- -0.15 # High quality NRS are unbiased
+bias_obs_high <- -0.08 # High quality NRS small bias
 bias_obs_mod <- -0.3 # -0.087 Decrease OR from 1.2 to 1.1 
 bias_obs_low <- -0.7 # -0.29 Decrease OR from 1.2 to 0.9
 

@@ -99,7 +99,7 @@ trial_loop <- function(study_id, n, baseline_p, trt_effect, bias,
 # 
 # @examples
 # naiive_ma(data = df, filter = "rct")
-naiive_ma <- function(data = df, filter){
+naive_ma <- function(data = df, filter){
   
   filtered <- data %>% filter(design %in% filter)
   
