@@ -84,3 +84,28 @@ trial_loop <- function(study_id, n, baseline_p, trt_effect, bias,
   
   out
 }
+
+
+
+# naiive_ma
+#
+# Run naiive meta-analysis of RCT and NRS
+# 
+# @param data A dataframe
+# @param filter A string to filter design by
+# 
+# @return A meta-analysis of the filtered data, including sub-group breakdowns
+#   if multiple study types are included
+# 
+# @examples
+# naiive_ma(data = df, filter = "rct")
+naiive_ma <- function(data = df, filter){
+  
+  filtered <- data %>% filter(design %in% filter)
+  
+  out <- metabin(event.e = r_2, n.e = n_2, event.c = r_1, 
+                 n.c = n_1, studlab = study_id,
+                 sm = "OR", byvar = design, data = filtered)
+  
+  out
+}

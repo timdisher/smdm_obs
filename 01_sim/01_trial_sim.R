@@ -7,11 +7,11 @@ source("./04_functions/smdm_obs_functions.R")
 
 # Truth
 baseline_p <- 0.05
-trt_effect <- 1.2 # Odds of adverse event is increased by treatment
+trt_effect <- 1.70 # Odds of adverse event is increased by treatment
 bias_rct <- 0 # RCTs are unbiased
-bias_obs_high <- 0 # High quality NRS are unbiased
-bias_obs_mod <- -0.2 # -0.087 Decrease OR from 1.2 to 1.1 
-bias_obs_low <- -0.5 # -0.29 Decrease OR from 1.2 to 0.9
+bias_obs_high <- -0.15 # High quality NRS are unbiased
+bias_obs_mod <- -0.3 # -0.087 Decrease OR from 1.2 to 1.1 
+bias_obs_low <- -0.7 # -0.29 Decrease OR from 1.2 to 0.9
 
 
 
@@ -19,7 +19,7 @@ bias_obs_low <- -0.5 # -0.29 Decrease OR from 1.2 to 0.9
 trials <- function(){
 # Simulate RCTs -------------------------------------------------------------- -
 rct_ids <- c("douglas_2015", "filteau_2011", "marchand_2013")
-rct_size <- c(10000, 10000, 10000)
+rct_size <- c(60, 150, 120)
 
 
 rct_df <- trial_loop(study_id = rct_ids,
@@ -30,8 +30,8 @@ rct_df <- trial_loop(study_id = rct_ids,
            design = "rct")
 
 # Simulate high quality nrs -------------------------------------------------- -
-obs_high_ids <- c("franklin_2018")
-obs_high_size <- c(10000)
+obs_high_ids <- c("franklin_2018", "zee_2018")
+obs_high_size <- c(700, 500)
 
 
 obs_high_df <- trial_loop(study_id = obs_high_ids,
@@ -43,8 +43,8 @@ obs_high_df <- trial_loop(study_id = obs_high_ids,
 
 
 # Simulate moderate quality nrs ---------------------------------------------- -
-obs_mod_ids <- c("lil_2018", "branch_2015")
-obs_mod_size <- c(10000, 10000)
+obs_mod_ids <- c("lil_2018", "branch_2015", "george_2014")
+obs_mod_size <-c(700, 550, 930)
 
 
 obs_mod_df <- trial_loop(study_id = obs_mod_ids,
@@ -54,10 +54,10 @@ obs_mod_df <- trial_loop(study_id = obs_mod_ids,
                           bias = bias_obs_mod,
                           design = "obs_mod")
 
-# Simulate moderate quality nrs ---------------------------------------------- -
+# Simulate low quality nrs ---------------------------------------------- -
 obs_low_ids <- c("jones_2011", "bradfield_2015", "blanchford_2015", "arnold_2011",
                   "lalonde_2012")
-obs_low_size <- c(10000, 10000, 10000, 10000, 10000)
+obs_low_size <- c(1000, 1200, 800, 950, 734)
 
 
 obs_low_df <- trial_loop(study_id = obs_low_ids,
