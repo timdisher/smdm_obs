@@ -86,30 +86,25 @@ m_3 <- metagen(TE = te_bp, seTE, sm = "OR", data = ex)
 m_4 <- metagen(TE = te_bi, seTE = se_w, sm = "OR", data = ex)
 
 
-
-# Model 5: Sensitivity on bias adjustment
-
-#####REQUIRES A LOOP OVER BIAS ADJUSTMENTS
-
-# Model 6: Three-level model-------------------------------------------------- -
+# Model 5: Three-level model-------------------------------------------------- -
 #   - Advantages: 
 #     - 
 #   - Limitations: 
 #     - 
 
 # Uses variance instead of standard error
-m_6 <- rma.mv(TE, var, random = ~ 1 | design/study_id, data= ex)
+m_5 <- rma.mv(TE, var, random = ~ 1 | design/study_id, data= ex)
 
-# Model 7: Three-level with viariance inflation------------------------------- -
+# Model 6: Three-level with viariance inflation------------------------------- -
 #   - Advantages: 
 #     - 
 #   - Limitations: 
 #     -
 
-m_7 <- rma.mv(TE, var_w, random = ~ 1 | design/study_id, data= ex)
+m_6 <- rma.mv(TE, var_w, random = ~ 1 | design/study_id, data= ex)
 
 
-# Model 8: Three-level with bias adjustment------------------------------- -
+# Model 7: Three-level with bias adjustment------------------------------- -
 #   - Advantages: 
 #     - 
 #   - Limitations: 
