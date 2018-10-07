@@ -3,8 +3,8 @@ library(meta)
 
 
 
-set.seed(42)
-df <- trials() 
+
+df <- read_csv("./02_data/smdm_rct_nrs.csv")
 
 
 ma_list <- list(
@@ -28,3 +28,4 @@ rcts_low = naive_ma(filter = c("rct", "obs_high", "obs_mod", "obs_low"))
 #Quick forest plots for each ------------------------------------------------- -
 
 map(ma_list, forest)
+

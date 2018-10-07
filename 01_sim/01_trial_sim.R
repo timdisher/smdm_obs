@@ -7,7 +7,7 @@ source("./04_functions/smdm_obs_functions.R")
 
 # Truth
 baseline_p <- 0.05
-trt_effect <- 1.70 # Odds of adverse event is increased by treatment
+trt_effect <- 1.7 # Odds of adverse event is increased by treatment
 bias_rct <- 0 # RCTs are unbiased
 bias_obs_high <- -0.08 # High quality NRS small bias
 bias_obs_mod <- -0.3 # -0.087 Decrease OR from 1.2 to 1.1 
@@ -19,7 +19,7 @@ bias_obs_low <- -0.7 # -0.29 Decrease OR from 1.2 to 0.9
 trials <- function(){
 # Simulate RCTs -------------------------------------------------------------- -
 rct_ids <- c("douglas_2015", "filteau_2011", "marchand_2013")
-rct_size <- c(60, 150, 120)
+rct_size <- c(50, 120, 100)
 
 
 rct_df <- trial_loop(study_id = rct_ids,
@@ -73,5 +73,6 @@ obs_low_df <- trial_loop(study_id = obs_low_ids,
 bind_rows(rct_df, obs_high_df, obs_mod_df, obs_low_df)
 }
 
-#smdm_data <- trials()
-# write.csv(smdm_data, file = "./02_data/smdm_rct_nrs.csv", row.names = FALSE)
+set.seed(42)
+smdm_data <- trials()
+write.csv(smdm_data, file = "./02_data/smdm_rct_nrs.csv", row.names = FALSE)

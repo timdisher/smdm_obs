@@ -87,7 +87,7 @@ trial_loop <- function(study_id, n, baseline_p, trt_effect, bias,
 
 
 
-# naiive_ma
+# naive_ma
 #
 # Run naiive meta-analysis of RCT and NRS
 # 
@@ -109,3 +109,4 @@ naive_ma <- function(data = df, filter){
   
   out
 }
+
