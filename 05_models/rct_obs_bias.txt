@@ -1,0 +1,175 @@
+model
+{
+
+#################################################################################################
+#
+#                                     RCT Bit
+#
+#################################################################################################    
+    
+for (i in 1:nsRCT) {
+        w[i, 1] <- 0.00000E+00
+        delta[i, 1] <- 0.00000E+00
+        mu[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:na[i]) {
+            r[i, k] ~ dbin(p[i, k], n[i, k])
+            logit(p[i, k]) <- mu[i] + delta[i, k] + step(k-2)*bRCT
+            rhat[i, k] <- p[i, k] * n[i, k]
+            dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - 
+                log(rhat[i, k])) + (n[i, k] - r[i, k]) * 
+                (log(n[i, k] - r[i, k]) - log(n[i, k] - 
+                  rhat[i, k])))
+        }
+        resdev[i] <- sum(dev[i, 1:na[i]])
+        for (k in 2:na[i]) {
+            delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+            md[i, k] <- d[t[i, k]] - d[t[i, 1]] + sw[i, k]
+            taud[i, k] <- tau * 2 * (k - 1)/k
+            w[i, k] <- (delta[i, k] - d[t[i, k]] + d[t[i, 1]])
+            sw[i, k] <- sum(w[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+    
+
+#################################################################################################
+#
+#                            High quality nrs bit
+#
+################################################################################################# 
+
+ 
+for (i in (nsRCT + 1):(nsRCT + nsOBShigh)) {
+        w[i, 1] <- 0.00000E+00
+        delta[i, 1] <- 0.00000E+00
+        mu[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:na[i]) {
+            r[i, k] ~ dbin(p[i, k], n[i, k])
+            logit(p[i, k]) <- mu[i] + delta[i, k] + step(k-2)*bOBShigh
+            rhat[i, k] <- p[i, k] * n[i, k]
+            dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - 
+                log(rhat[i, k])) + (n[i, k] - r[i, k]) * 
+                (log(n[i, k] - r[i, k]) - log(n[i, k] - 
+                  rhat[i, k])))
+        }
+        resdev[i] <- sum(dev[i, 1:na[i]])
+        for (k in 2:na[i]) {
+            delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+            md[i, k] <- d[t[i, k]] - d[t[i, 1]] + sw[i, k]
+            taud[i, k] <- tau * 2 * (k - 1)/k
+            w[i, k] <- (delta[i, k] - d[t[i, k]] + d[t[i, 1]])
+            sw[i, k] <- sum(w[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+
+
+
+
+#################################################################################################
+#
+#                            Moderate quality nrs bit
+#
+################################################################################################# 
+
+ 
+for (i in (nsRCT + nsOBShigh + 1):(nsRCT + nsOBShigh + nsOBSmod)) {
+        w[i, 1] <- 0.00000E+00
+        delta[i, 1] <- 0.00000E+00
+        mu[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:na[i]) {
+            r[i, k] ~ dbin(p[i, k], n[i, k])
+            logit(p[i, k]) <- mu[i] + delta[i, k] + step(k-2)*bOBSmod
+            rhat[i, k] <- p[i, k] * n[i, k]
+            dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - 
+                log(rhat[i, k])) + (n[i, k] - r[i, k]) * 
+                (log(n[i, k] - r[i, k]) - log(n[i, k] - 
+                  rhat[i, k])))
+        }
+        resdev[i] <- sum(dev[i, 1:na[i]])
+        for (k in 2:na[i]) {
+            delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+            md[i, k] <- d[t[i, k]] - d[t[i, 1]] + sw[i, k]
+            taud[i, k] <- tau * 2 * (k - 1)/k
+            w[i, k] <- (delta[i, k] - d[t[i, k]] + d[t[i, 1]])
+            sw[i, k] <- sum(w[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+
+
+
+#################################################################################################
+#
+#                            Low quality nrs bit
+#
+################################################################################################# 
+
+ 
+for (i in (nsRCT + nsOBShigh + nsOBSmod + 1):(nsRCT + nsOBShigh + nsOBSmod + nsOBSlow)) {
+        w[i, 1] <- 0.00000E+00
+        delta[i, 1] <- 0.00000E+00
+        mu[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:na[i]) {
+            r[i, k] ~ dbin(p[i, k], n[i, k])
+            logit(p[i, k]) <- mu[i] + delta[i, k] + step(k-2)*bOBSlow
+            rhat[i, k] <- p[i, k] * n[i, k]
+            dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - 
+                log(rhat[i, k])) + (n[i, k] - r[i, k]) * 
+                (log(n[i, k] - r[i, k]) - log(n[i, k] - 
+                  rhat[i, k])))
+        }
+        resdev[i] <- sum(dev[i, 1:na[i]])
+        for (k in 2:na[i]) {
+            delta[i, k] ~ dnorm(md[i, k], taud[i, k])
+            md[i, k] <- d[t[i, k]] - d[t[i, 1]] + sw[i, k]
+            taud[i, k] <- tau * 2 * (k - 1)/k
+            w[i, k] <- (delta[i, k] - d[t[i, k]] + d[t[i, 1]])
+            sw[i, k] <- sum(w[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+
+
+
+
+
+#################################################################################################
+#
+#                            Priors and Bias terms
+#
+################################################################################################# 
+
+totresdev <- sum(resdev[])
+    d[1] <- 0.00000E+00
+    for(k in 2:nt) {d[k] ~ dnorm(0, 0.0001)}
+    sd ~ dunif(0, 5)
+    tau <- pow(sd, -2)
+
+
+
+
+bRCT <- 0
+bOBShigh ~ dnorm(b_obs_high_m, b_obs_high_p)
+bOBSmod ~ dnorm(b_obs_mod_m, b_obs_mod_p)
+bOBSlow ~ dnorm(b_obs_low_m, b_obs_low_p)
+
+
+
+#################################################################################################
+#
+#                            Outputs
+#
+################################################################################################# 
+
+
+for (c in 1:(nt - 1)) {
+        for (k in (c + 1):nt) {
+            or[c, k] <- exp(d[k] - d[c])
+        }
+    }
+
+    rk <- nt + 1 - rank(d[])
+    for (k in 1:nt) {
+        best[k] <- equals(rk[k], 1)
+        for (h in 1:nt) {
+            prob[k, h] <- equals(rk[k], h)
+        }
+    }
+}

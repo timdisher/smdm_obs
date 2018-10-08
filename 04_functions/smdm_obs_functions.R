@@ -99,7 +99,7 @@ trial_loop <- function(study_id, n, baseline_p, trt_effect, bias,
 # 
 # @examples
 # naiive_ma(data = df, filter = "rct")
-naive_ma <- function(data = df, filter){
+naive_ma <- function(data = data, filter){
   
   filtered <- data %>% filter(design %in% filter)
   
@@ -110,3 +110,127 @@ naive_ma <- function(data = df, filter){
   out
 }
 
+# extract
+# 
+# Extracts relevant characteristics from meta results
+extract <- function(data){
+  temp <- summary(data)$random[c("TE", "lower", "upper", "p")]
+  t(do.call(rbind, temp)) %>% as.data.frame()
+}
+
+
+# extract
+# 
+# Extracts relevant characteristics from metafor results
+extract_alt <- function(data){
+  
+  out <- data.frame(TE = data$beta,
+                    lower = data$ci.lb,
+                    upper = data$ci.ub,
+                    p = data$pval) %>% slice(1)
+  
+  out 
+}
+
+# ma_sim
+# 
+# Simulate operating characteristics for designs
+# 
+# 
+ma_sim <- function(nsims, true_effect){
+
+start <- Sys.time()
+sim_list <- rep(list(NA), nsims)
+for(i in 1:nsims){
+  
+  
+  temp <- trials(trt_effect = true_effect) %>% mutate(design = factor(design, levels = c("rct", "obs_high",
+                                                               "obs_mod", "obs_low")))
+  
+  effects <- naive_ma(filter = c("rct", "obs_high", "obs_mod", "obs_low"), data = temp)
+  
+   df <- temp %>% mutate(TE = effects$TE,
+           seTE = effects$seTE,
+           se_w = case_when(design == "rct" ~ sqrt(seTE^2/1), #no inflation for RCTs
+                            design == "obs_high" ~ sqrt(seTE^2/0.8), # Inflate by 20%
+                            design == "obs_mod" ~ sqrt(seTE^2/0.6), # Inflate by 40%
+                            TRUE ~ seTE/0.5),
+           te_bp = case_when(design == "rct" ~ TE + 0,
+                             design == "obs_high" ~ TE + bias_obs_high*-1,
+                             design == "obs_mod" ~ TE + bias_obs_mod*-1,
+                             TRUE ~ TE + bias_obs_low*-1),
+           
+           te_bi = case_when(design == "rct" ~ TE + 0,
+                             design == "obs_high" ~ TE + bias_obs_high*-1*0.8,
+                             design == "obs_mod" ~ TE + bias_obs_mod*-1*0.6,
+                             TRUE ~ TE + bias_obs_low*-1*0.5),
+           var = seTE^2,
+           var_w = se_w^2
+    )# Simulate a set of trials
+  
+  ma_list = list(   
+    # Limit to rcts -------------------------------------------------------------- -
+    rcts = naive_ma(filter = c("rct"), data = df),
+    
+    # Include high quality Obs --------------------------------------------------- -
+    
+    rcts_high = naive_ma(filter = c("rct", "obs_high"), data = df),
+    
+    # Include mod quality obs ---------------------------------------------------- -
+    
+    rcts_mod = naive_ma(filter = c("rct", "obs_high", "obs_mod"), data = df),
+    
+    # Include all quality obs ---------------------------------------------------- -
+    
+    rcts_low = naive_ma(filter = c("rct", "obs_high", "obs_mod", "obs_low"), data = df),
+    
+    # Variance adjustment----------------------------------------------------- -
+    var = metagen(TE, seTE = se_w, sm = "OR", data = df),
+    
+    # Bias adjustment--------------------------------------------------------- -
+    bias = metagen(TE = te_bp, seTE, sm = "OR", data = df),
+    
+    # Variance and bias  adjustment------------------------------------------- -
+    var_bias = metagen(TE = te_bi, seTE = se_w, sm = "OR", data = df)
+    
+  )    
+  
+  
+  
+  
+  ma_sens <- list(
+    
+    reg = metareg(ma_list$rcts_low, ~ design),
+    three_lvl = rma.mv(TE, var, random = ~ 1 | design/study_id, data= df),
+    three_lvl_var = rma.mv(TE, var_w, random = ~ 1 | design/study_id, data= df,
+                           control=list(optimizer = "optim",
+                                        maxit = 1e8,
+                                        reltol = 1e-8)),
+    three_lvl_bias = rma.mv(te_bi, var, random = ~ 1 | design/study_id, data= df,
+                            control = list(optimizer = "optim", 
+                                           maxit = 1e8,
+                                           reltol = 1e-8))
+  )
+  
+  
+  alt_res <- map(ma_sens, extract_alt) %>% do.call(rbind, .) %>% 
+    rownames_to_column(var = "scen")
+  
+  
+  
+  sim_list[[i]] <- map(ma_list, extract) %>% do.call(rbind, .) %>% 
+    rownames_to_column(var = "scen") %>% rbind(alt_res)
+  
+}
+  out <- do.call(rbind, sim_list) %>% mutate_at(vars(TE:upper), exp) %>%
+    mutate(true = true_effect,
+           ror = TE/true,
+           sig = p <= 0.05,
+           cov = true >= lower & true <= upper)
+  
+  end <- Sys.time()
+  time <- end - start
+  
+  print(time)
+  out
+}

@@ -3,11 +3,13 @@
 # Project: SMDM RCT + NRS half-day workshop
 # Date: 2018-10-14
 # Script: Flat models
-#   - [X] Variance inflation
-#   - [X] Bias adjustment 
-#   - [X] Variance inflation + bias adjustment
-#   - [] Three-level model 
-#   - [] Bias adjustment + variance inflation three-level model
+#   - [X] m_1: Meta-regression
+#   - [X] m_2: Variance inflation
+#   - [X] m_3: Bias adjustment 
+#   - [X] m_4: Variance inflation + bias adjustment
+#   - [X] m_5: Three-level model 
+#   - [X] m_6: THree-level model with varianceinflation
+#   - [X] m_7: Bias adjustment + variance inflation three-level model
 #
 #============================================================================= =
 source("./01_sim/02_naive_analysis.R")

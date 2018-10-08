@@ -16,10 +16,10 @@ bias_obs_low <- -0.7 # -0.29 Decrease OR from 1.2 to 0.9
 
 
 
-trials <- function(){
+trials <- function(trt_effect = trt_effect){
 # Simulate RCTs -------------------------------------------------------------- -
 rct_ids <- c("douglas_2015", "filteau_2011", "marchand_2013")
-rct_size <- c(50, 120, 100)
+rct_size <- c(120, 80, 100)
 
 
 rct_df <- trial_loop(study_id = rct_ids,
@@ -73,6 +73,7 @@ obs_low_df <- trial_loop(study_id = obs_low_ids,
 bind_rows(rct_df, obs_high_df, obs_mod_df, obs_low_df)
 }
 
-set.seed(42)
-smdm_data <- trials()
-write.csv(smdm_data, file = "./02_data/smdm_rct_nrs.csv", row.names = FALSE)
+
+# set.seed(42)
+# smdm_data <- trials()
+# write.csv(smdm_data, file = "./02_data/smdm_rct_nrs.csv", row.names = FALSE)

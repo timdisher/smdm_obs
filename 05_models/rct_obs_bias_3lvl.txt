@@ -1,0 +1,277 @@
+model
+{
+
+#################################################################################################
+#
+#                                     Overall Bit
+#
+# Note: If used for network meta-analysis, this code requires that all designs
+# estimate the same basic parameters (e.g. d[1] is always the same). Code may also
+# need to be edited if some designs have data on more treatments than others
+# (e.g. ntRCT instead of nt)
+#
+#################################################################################################    
+
+###################################################
+# Shared random effect distributions across studies
+###################################################
+    for (k in 2:nt) {
+        dRCT[k] ~ dnorm(d[k] + bRCT, tauOA)
+        dOBShigh[k] ~ dnorm(d[k] + bOBShigh, tauOA)
+        dOBSmod[k] ~ dnorm(d[k] + bOBSmod, tauOA)
+        dOBSlow[k] ~ dnorm(d[k] + bOBSlow, tauOA)
+    }
+    
+###################################################
+# Total residual deviance is sum of each 
+###################################################
+    totresdev = sum(totresdevRCT, totresdevOBShigh, totresdevOBSmod, totresdevOBSlow)
+ 
+###################################################
+# Overall Priors and bias terms
+###################################################
+
+    d[1] <- 0.00000E+00
+    for (k in 2:nt) {
+        d[k] ~ dnorm(0.00000E+00, 1.00000E-04) 
+    }
+    
+    sdOA ~ dunif(0.00000E+00, 2)
+    tauOA <- pow(sdOA, -2)
+
+
+    bRCT <- 0
+    bOBShigh ~ dnorm(b_obs_high_m, b_obs_high_p)
+    bOBSmod ~ dnorm(b_obs_mod_m, b_obs_mod_p)
+    bOBSlow ~ dnorm(b_obs_low_m, b_obs_low_p)
+
+ 
+###################################################
+# Overall outputs
+###################################################   
+
+    for (c in 1:(nt)) {
+        for (k in (c + 1):nt) {
+            or[c, k] <- exp(d[k] - d[c])
+        }
+    }
+
+
+#################################################################################################
+#
+#                                     RCT Bit
+#
+#################################################################################################    
+
+    for (i in 1:nsRCT) {
+        wRCT[i, 1] <- 0.00000E+00
+        deltaRCT[i, 1] <- 0.00000E+00
+        muRCT[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naRCT[i]) {
+            rRCT[i, k] ~ dbin(pRCT[i, k], nRCT[i, k])
+            logit(pRCT[i, k]) <- muRCT[i] + deltaRCT[i, k]
+            rhatRCT[i, k] <- pRCT[i, k] * nRCT[i, k]
+            devRCT[i, k] <- 2 * (rRCT[i, k] * (log(rRCT[i, k]) - 
+                log(rhatRCT[i, k])) + (nRCT[i, k] - rRCT[i, k]) * 
+                (log(nRCT[i, k] - rRCT[i, k]) - log(nRCT[i, k] - 
+                  rhatRCT[i, k])))
+        }
+        resdevRCT[i] <- sum(devRCT[i, 1:naRCT[i]])
+        for (k in 2:naRCT[i]) {
+            deltaRCT[i, k] ~ dnorm(mdRCT[i, k], taudRCT[i, k])
+            mdRCT[i, k] <- dRCT[tRCT[i, k]] - dRCT[tRCT[i, 1]] + 
+                swRCT[i, k]
+            taudRCT[i, k] <- tauRCT * 2 * (k - 1)/k
+            wRCT[i, k] <- (deltaRCT[i, k] - dRCT[tRCT[i, k]] + 
+                dRCT[tRCT[i, 1]])
+            swRCT[i, k] <- sum(wRCT[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+    totresdevRCT <- sum(resdevRCT[])
+    
+
+###################################################
+# RCT Priors
+###################################################
+
+    dRCT[1] <- 0.00000E+00
+    sdRCT ~ dunif(0, 2)
+    tauRCT <- pow(sdRCT, -2)
+
+###################################################
+# RCT outputs
+###################################################
+
+    for (c in 1:(ntRCT - 1)) {
+        for (k in (c + 1):ntRCT) {
+            orRCT[c, k] <- exp(dRCT[k] - dRCT[c])
+        }
+    }
+
+
+#################################################################################################
+#
+#                                     High quality obs bit
+#
+#################################################################################################    
+
+
+    for (i in 1:nsOBShigh) {
+        wOBShigh[i, 1] <- 0.00000E+00
+        deltaOBShigh[i, 1] <- 0.00000E+00
+        muOBShigh[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naOBShigh[i]) {
+            rOBShigh[i, k] ~ dbin(pOBShigh[i, k], nOBShigh[i, 
+                k])
+            logit(pOBShigh[i, k]) <- muOBShigh[i] + deltaOBShigh[i, 
+                k]
+            rhatOBShigh[i, k] <- pOBShigh[i, k] * nOBShigh[i, 
+                k]
+            devOBShigh[i, k] <- 2 * (rOBShigh[i, k] * (log(rOBShigh[i, 
+                k]) - log(rhatOBShigh[i, k])) + (nOBShigh[i, 
+                k] - rOBShigh[i, k]) * (log(nOBShigh[i, k] - 
+                rOBShigh[i, k]) - log(nOBShigh[i, k] - rhatOBShigh[i, 
+                k])))
+        }
+        resdevOBShigh[i] <- sum(devOBShigh[i, 1:naOBShigh[i]])
+        for (k in 2:naOBShigh[i]) {
+            deltaOBShigh[i, k] ~ dnorm(mdOBShigh[i, k], taudOBShigh[i, 
+                k])
+            mdOBShigh[i, k] <- dOBShigh[tOBShigh[i, k]] - dOBShigh[tOBShigh[i, 
+                1]] + swOBShigh[i, k]
+            taudOBShigh[i, k] <- tauOBShigh * 2 * (k - 1)/k
+            wOBShigh[i, k] <- (deltaOBShigh[i, k] - dOBShigh[tOBShigh[i, 
+                k]] + dOBShigh[tOBShigh[i, 1]])
+            swOBShigh[i, k] <- sum(wOBShigh[i, 1:(k - 1)])/(k - 
+                1)
+        }
+    }
+    totresdevOBShigh <- sum(resdevOBShigh[])
+    
+###################################################
+# High quality obs priors
+###################################################
+   
+    dOBShigh[1] <- 0.00000E+00
+    sdOBShigh ~ dunif(0, 2)
+    tauOBShigh <- pow(sdOBShigh, -2)
+
+###################################################
+# High quality obs outputs
+###################################################
+
+    for (c in 1:(ntOBShigh - 1)) {
+        for (k in (c + 1):ntOBShigh) {
+            orOBShigh[c, k] <- exp(dOBShigh[k] - dOBShigh[c])
+        }
+    }
+
+
+#################################################################################################
+#
+#                               Moderate quality obs Bit
+#
+#################################################################################################    
+
+
+    for (i in 1:nsOBSmod) {
+        wOBSmod[i, 1] <- 0.00000E+00
+        deltaOBSmod[i, 1] <- 0.00000E+00
+        muOBSmod[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naOBSmod[i]) {
+            rOBSmod[i, k] ~ dbin(pOBSmod[i, k], nOBSmod[i, k])
+            logit(pOBSmod[i, k]) <- muOBSmod[i] + deltaOBSmod[i, k]
+            rhatOBSmod[i, k] <- pOBSmod[i, k] * nOBSmod[i, k]
+            devOBSmod[i, k] <- 2 * (rOBSmod[i, k] * (log(rOBSmod[i, k]) - 
+                log(rhatOBSmod[i, k])) + (nOBSmod[i, k] - rOBSmod[i, k]) * 
+                (log(nOBSmod[i, k] - rOBSmod[i, k]) - log(nOBSmod[i, k] - 
+                  rhatOBSmod[i, k])))
+        }
+        resdevOBSmod[i] <- sum(devOBSmod[i, 1:naOBSmod[i]])
+        for (k in 2:naOBSmod[i]) {
+            deltaOBSmod[i, k] ~ dnorm(mdOBSmod[i, k], taudOBSmod[i, k])
+            mdOBSmod[i, k] <- dOBSmod[tOBSmod[i, k]] - dOBSmod[tOBSmod[i, 1]] + 
+                swOBSmod[i, k]
+            taudOBSmod[i, k] <- tauOBSmod * 2 * (k - 1)/k
+            wOBSmod[i, k] <- (deltaOBSmod[i, k] - dOBSmod[tOBSmod[i, k]] + 
+                dOBSmod[tOBSmod[i, 1]])
+            swOBSmod[i, k] <- sum(wOBSmod[i, 1:(k - 1)])/(k - 1)
+        }
+    }
+    totresdevOBSmod <- sum(resdevOBSmod[])
+
+###################################################
+# Moderate quality obs priors
+###################################################
+
+    dOBSmod[1] <- 0.00000E+00
+    sdOBSmod ~ dunif(0, 5)
+    tauOBSmod <- pow(sdOBSmod, -2)
+
+###################################################
+# Moderate quality obs outputs
+###################################################
+
+    for (c in 1:(ntOBSmod - 1)) {
+        for (k in (c + 1):ntOBSmod) {
+            orOBSmod[c, k] <- exp(dOBSmod[k] - dOBSmod[c])
+        }
+    }
+
+
+#################################################################################################
+#
+#                               Low quality obs Bit
+#
+#################################################################################################    
+
+
+
+    for (i in 1:nsOBSlow) {
+        wOBSlow[i, 1] <- 0.00000E+00
+        deltaOBSlow[i, 1] <- 0.00000E+00
+        muOBSlow[i] ~ dnorm(0.00000E+00, 1.00000E-04)
+        for (k in 1:naOBSlow[i]) {
+            rOBSlow[i, k] ~ dbin(pOBSlow[i, k], nOBSlow[i, k])
+            logit(pOBSlow[i, k]) <- muOBSlow[i] + deltaOBSlow[i, 
+                k]
+            rhatOBSlow[i, k] <- pOBSlow[i, k] * nOBSlow[i, k]
+            devOBSlow[i, k] <- 2 * (rOBSlow[i, k] * (log(rOBSlow[i, 
+                k]) - log(rhatOBSlow[i, k])) + (nOBSlow[i, k] - 
+                rOBSlow[i, k]) * (log(nOBSlow[i, k] - rOBSlow[i, 
+                k]) - log(nOBSlow[i, k] - rhatOBSlow[i, k])))
+        }
+        resdevOBSlow[i] <- sum(devOBSlow[i, 1:naOBSlow[i]])
+        for (k in 2:naOBSlow[i]) {
+            deltaOBSlow[i, k] ~ dnorm(mdOBSlow[i, k], taudOBSlow[i, 
+                k])
+            mdOBSlow[i, k] <- dOBSlow[tOBSlow[i, k]] - dOBSlow[tOBSlow[i, 
+                1]] + swOBSlow[i, k]
+            taudOBSlow[i, k] <- tauOBSlow * 2 * (k - 1)/k
+            wOBSlow[i, k] <- (deltaOBSlow[i, k] - dOBSlow[tOBSlow[i, 
+                k]] + dOBSlow[tOBSlow[i, 1]])
+            swOBSlow[i, k] <- sum(wOBSlow[i, 1:(k - 1)])/(k - 
+                1)
+        }
+    }
+    totresdevOBSlow <- sum(resdevOBSlow[])
+
+###################################################
+# Low quality obs priors
+###################################################
+
+    dOBSlow[1] <- 0.00000E+00
+    sdOBSlow ~ dunif(0, 5)
+    tauOBSlow <- pow(sdOBSlow, -2)
+
+###################################################
+# Low quality obs outputs
+###################################################
+
+    for (c in 1:(ntOBSlow - 1)) {
+        for (k in (c + 1):ntOBSlow) {
+            orOBSlow[c, k] <- exp(dOBSlow[k] - dOBSlow[c])
+        }
+    }
+}
+
