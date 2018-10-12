@@ -1,6 +1,6 @@
 library(tidyverse)
 library(reshape2)
-source("./04_functions/smdm_obs_functions.R")
+source("./03_functions/smdm_obs_functions.R")
 # Treatment 1 - Best available care
 # Treatment 2 - NAP procedure
 # Outcome = Rare adverse event 

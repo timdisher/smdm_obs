@@ -24,13 +24,8 @@ bayes_df <- df %>% mutate(na = 2,
 #     - Minimal improvements over frequentist if very vague priors used
 
 
-m1_model <- "./05_models/rct_obs_bias.txt"
+m1_model <- "./04_models/rct_obs_bias.txt"
 m1_binom_pars <- c("or", "sd", "totresdev")
-
-bayes_df <- df %>% mutate(na = 2,
-                    t_1 = 1,
-                    t_2 = 2)
-
 
 m1_data_list = list(
   t = select(bayes_df, t_1, t_2) %>% as.matrix(),
@@ -56,7 +51,7 @@ bayes_m1 <- jags.parallel(m1_data_list, NULL, m1_binom_pars,
               model.file = m1_model,
               n.chains = 3, n.iter = 60000, n.burnin = 40000, n.thin = 1)
 
-traceplot(bayes_m1$BUGSoutput)
+#traceplot(bayes_m1$BUGSoutput)
 
 
 
@@ -68,7 +63,7 @@ traceplot(bayes_m1$BUGSoutput)
 #     - More work to get estimates
 #     - Minimal improvements over frequentist if very vague priors used
 
-m2_model <- "./05_models/rct_obs_bias_3lvl.txt"
+m2_model <- "./04_models/rct_obs_bias_3lvl.txt"
 m2_binom_pars <- c("or", "sdOA", "totresdev")
 
 
@@ -127,4 +122,4 @@ bayes_m2 <- jags.parallel(m2_data_list,NULL,m2_binom_pars,
                           model.file = m2_model,
                           n.chains = 3, n.iter = 80000, n.burnin = 40000, n.thin = 1)
 
-traceplot(bayes_m2$BUGSoutput)
+#traceplot(bayes_m2$BUGSoutput)

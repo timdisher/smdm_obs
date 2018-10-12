@@ -11,7 +11,7 @@ library(beepr)
 #
 #============================================================================= =
 sims <- ma_sim(nsims = 100, true_effect = 1.7)
-beep(sound = 8)
+#beep(sound = 8)
 
 #============================================================================= =
 #
@@ -21,11 +21,10 @@ beep(sound = 8)
 #
 #============================================================================= =
 
-sims %>% mutate(scen = factor(scen, levels = fct_order)) %>% group_by(scen) %>% 
+sims %>% mutate(scen = as_factor(scen)) %>% group_by(scen) %>% 
   summarise(ror = mean(ror),
               cov = mean(cov),
               power = ifelse(trt_effect > 1, mean(sig), NA),
               alpha = ifelse(trt_effect == 1, mean(sig), NA)) %>% arrange(scen)
   
-
 
