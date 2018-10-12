@@ -201,15 +201,15 @@ for(i in 1:nsims){
   ma_sens <- list(
     
     reg = metareg(ma_list$rcts_low, ~ design),
-    three_lvl = rma.mv(TE, var, random = ~ 1 | design/study_id, data= df),
+    three_lvl = rma.mv(TE, var, random = ~ 1 | design/study_id, data= df,
+                       control = list(iter.max = 10e8,
+                                      rel.tol = 1e-7)),
     three_lvl_var = rma.mv(TE, var_w, random = ~ 1 | design/study_id, data= df,
-                           control=list(optimizer = "optim",
-                                        maxit = 1e8,
-                                        reltol = 1e-8)),
-    three_lvl_bias = rma.mv(te_bi, var, random = ~ 1 | design/study_id, data= df,
-                            control = list(optimizer = "optim", 
-                                           maxit = 1e8,
-                                           reltol = 1e-8))
+                           control = list(iter.max = 10e8,
+                                          rel.tol = 1e-7)),
+    three_lvl_bias = rma.mv(te_bi, var_w, random = ~ 1 | design/study_id, data= df,
+                            control = list(iter.max = 10e8,
+                                           rel.tol = 1e-7))
   )
   
   
