@@ -8,7 +8,7 @@
 #   - [X] m_3: Bias adjustment 
 #   - [X] m_4: Variance inflation + bias adjustment
 #   - [X] m_5: Three-level model 
-#   - [X] m_6: THree-level model with varianceinflation
+#   - [X] m_6: THree-level model with variance inflation
 #   - [X] m_7: Bias adjustment + variance inflation three-level model
 #
 #============================================================================= =
@@ -27,9 +27,9 @@ library(metafor) #For three-level models
 ex <- df %>% mutate(TE = ma_list$rcts_low$TE,
                     seTE = ma_list$rcts_low$seTE,
                     se_w = case_when(design == "rct" ~ sqrt(seTE^2/1), #no inflation for RCTs
-                                     design == "obs_high" ~ sqrt(seTE^2/0.8), # Inflate by 40%
-                                     design == "obs_mod" ~ sqrt(seTE^2/0.5), # Inflate by 40%
-                                     TRUE ~ seTE/0.3),
+                                     design == "obs_high" ~ sqrt(seTE^2/0.8), # Inflate by 20%
+                                     design == "obs_mod" ~ sqrt(seTE^2/0.5), # Inflate by 50%
+                                     TRUE ~ sqrt(seTE^2/0.3)),
                     te_bp = case_when(design == "rct" ~ TE + 0,
                                      design == "obs_high" ~ TE + bias_obs_high*-1,
                                      design == "obs_mod" ~ TE + bias_obs_mod*-1,

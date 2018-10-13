@@ -32,25 +32,14 @@ sd_low = (log(upper_low) - log(lower_low))/2
 hist(rnorm(1000, u_low, sd_low))
 
 
-ex <- df %>% mutate(TE = ma_list$rcts_low$TE,
-                    seTE = ma_list$rcts_low$seTE,
-                    se_w = case_when(design == "rct" ~ sqrt(seTE^2/1), #no inflation for RCTs
-                                     design == "obs_high" ~ sqrt(seTE^2/0.8), # Inflate by 40%
-                                     design == "obs_mod" ~ sqrt(seTE^2/0.5), # Inflate by 40%
-                                     TRUE ~ sqrt(seTE^2/0.3)),
-                    se_wu = case_when(design == "rct" ~ seTE,
+ex <- ex %>% mutate(se_wu = case_when(design == "rct" ~ seTE,
                                         design == "obs_high" ~ sqrt(seTE^2 + sd_high^2),
                                         design == "obs_mod" ~ sqrt(seTE^2 + sd_mod^2),
                                         TRUE ~ sqrt(seTE^2 + sd_low^2)),
-                    te_bp = case_when(design == "rct" ~ TE + 0,
-                                      design == "obs_high" ~ TE + bias_obs_high*-1,
-                                      design == "obs_mod" ~ TE + bias_obs_mod*-1,
-                                      TRUE ~ TE + bias_obs_low*-1),
-                    
+            
                     te_bi = case_when(design == "rct" ~ TE + 0,
                                       design == "obs_high" ~ TE + u_high*-1,
                                       design == "obs_mod" ~ TE + u_mod*-1,
                                       TRUE ~ TE + u_low*-1),
-                    var = seTE^2,
-                    var_w = se_w^2
-)
+                    var_wu = se_wu^2)
+
