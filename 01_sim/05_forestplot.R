@@ -1,5 +1,4 @@
 # Forest plot of all scenarios
-source("./01_sim/03_freq_models.R")
 source("./01_sim/04_bayes_models.R")
 library(tidybayes)
 library(forestplot)
