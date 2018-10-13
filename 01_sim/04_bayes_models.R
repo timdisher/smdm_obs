@@ -8,6 +8,7 @@
 #
 #============================================================================= =
 #
+source("./01_sim/03_freq_models.R")
 library(R2jags)
 
 bayes_df <- df %>% mutate(na = 2,
@@ -39,11 +40,11 @@ m1_data_list = list(
   nt = 2,
   b_rct = bias_rct,
   b_obs_high_m = bias_obs_high,
-  b_obs_high_p = 0.04^-2,
+  b_obs_high_p = 0.1^-2,
   b_obs_mod_m = bias_obs_mod,
-  b_obs_mod_p = 0.04^-2,
+  b_obs_mod_p = 0.1^-2,
   b_obs_low_m = bias_obs_low,
-  b_obs_low_p = 0.04^-2
+  b_obs_low_p = 0.1^-2
   
 )
 
@@ -77,12 +78,12 @@ m2_data_list = list(
   
 #Overall parameters
 b_rct = bias_rct,
-b_obs_high_m = bias_obs_high,
-b_obs_high_p = 0.04^-2,
-b_obs_mod_m = bias_obs_mod,
-b_obs_mod_p = 0.04^-2,
-b_obs_low_m = bias_obs_low,
-b_obs_low_p = 0.04^-2,
+b_obs_high_m = bias_obs_high*0.8,
+b_obs_high_p = 0.1^-2,
+b_obs_mod_m = bias_obs_mod*0.6,
+b_obs_mod_p = 0.1^-2,
+b_obs_low_m = bias_obs_low*0.5,
+b_obs_low_p = 0.1^-2,
 nt = 2, 
 
 #RCTs

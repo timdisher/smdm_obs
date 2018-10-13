@@ -3,15 +3,15 @@ library(reshape2)
 source("./03_functions/smdm_obs_functions.R")
 # Treatment 1 - Best available care
 # Treatment 2 - NAP procedure
-# Outcome = Rare adverse event 
+# Outcome = Neurodevelopmental impairment 
 
 # Truth
 baseline_p <- 0.05
 trt_effect <- 1.7 # Odds of adverse event is increased by treatment
 bias_rct <- 0 # RCTs are unbiased
-bias_obs_high <- -0.08 # High quality NRS small bias
-bias_obs_mod <- -0.3 # -0.087 Decrease OR from 1.2 to 1.1 
-bias_obs_low <- -0.7 # -0.29 Decrease OR from 1.2 to 0.9
+bias_obs_high <- -0.08 # High quality NRS small bias from 1.7 to 1.62
+bias_obs_mod <- -0.3 #  Decrease OR from 1.7 to 1.4 
+bias_obs_low <- -0.7 #  Decrease OR from 1.7 to 1
 
 
 

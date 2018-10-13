@@ -1,11 +1,11 @@
 source("./01_sim/01_trial_sim.R")
 library(meta)
+library(forcats)
 
 
 
 
-df <- read_csv("./02_data/smdm_rct_nrs.csv")
-
+df <- read_csv("./02_data/smdm_rct_nrs.csv") %>% mutate(design = as_factor(design))
 
 ma_list <- list(
 # Limit to rcts -------------------------------------------------------------- -

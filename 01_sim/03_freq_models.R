@@ -27,9 +27,9 @@ library(metafor) #For three-level models
 ex <- df %>% mutate(TE = ma_list$rcts_low$TE,
                     seTE = ma_list$rcts_low$seTE,
                     se_w = case_when(design == "rct" ~ sqrt(seTE^2/1), #no inflation for RCTs
-                                     design == "obs_high" ~ sqrt(seTE^2/0.8), # Inflate by 20%
-                                     design == "obs_mod" ~ sqrt(seTE^2/0.6), # Inflate by 40%
-                                     TRUE ~ seTE/0.5),
+                                     design == "obs_high" ~ sqrt(seTE^2/0.8), # Inflate by 40%
+                                     design == "obs_mod" ~ sqrt(seTE^2/0.5), # Inflate by 40%
+                                     TRUE ~ seTE/0.3),
                     te_bp = case_when(design == "rct" ~ TE + 0,
                                      design == "obs_high" ~ TE + bias_obs_high*-1,
                                      design == "obs_mod" ~ TE + bias_obs_mod*-1,
@@ -112,5 +112,5 @@ m_6 <- rma.mv(TE, var_w, random = ~ 1 | design/study_id, data= ex)
 #   - Limitations: 
 #     -
 
-m_7 <- rma.mv(te_bp, var, random = ~ 1 | design/study_id, data= ex)
+m_7 <- rma.mv(te_bi, var_w, random = ~ 1 | design/study_id, data= ex)
 
