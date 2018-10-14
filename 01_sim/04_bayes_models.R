@@ -17,12 +17,6 @@ bayes_df <- df %>% mutate(na = 2,
 
 
 # Model 1: Uncertain bias adjustment------------------------------------------ -
-#   - Advantages: 
-#     - Allows for uncertainty in appropriate bias adjustment
-#     - Automatically inflates variance
-#   - Limitations: 
-#     - More work to get estimates
-#     - Minimal improvements over frequentist if very vague priors used
 
 
 m1_model <- "./04_models/rct_obs_bias.txt"
@@ -57,12 +51,7 @@ bayes_m1 <- jags.parallel(m1_data_list, NULL, m1_binom_pars,
 
 
 # Model 2: Three-level with  bias adjustment---------------------------------- -
-#   - Advantages: 
-#     - Allows for uncertainty in appropriate bias adjustment
-#     - Automatically inflates variance
-#   - Limitations: 
-#     - More work to get estimates
-#     - Minimal improvements over frequentist if very vague priors used
+
 
 m2_model <- "./04_models/rct_obs_bias_3lvl.txt"
 m2_binom_pars <- c("or", "sdOA", "totresdev")

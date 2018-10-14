@@ -2,8 +2,8 @@
 #
 # Project: SMDM RCT + NRS half-day workshop
 # Date: 2018-10-14
-# Script: Flat models
-#   - [X] m_1: Meta-regression
+# Script: Frquentist models
+#   - [X] m_1: Meta-regression (sub groups)
 #   - [X] m_2: Variance inflation
 #   - [X] m_3: Bias adjustment 
 #   - [X] m_4: Variance inflation + bias adjustment
@@ -44,73 +44,42 @@ ex <- df %>% mutate(TE = ma_list$rcts_low$TE,
                     )
 
 # Model 1: Meta-regression on design ----------------------------------------- -
-#   - Advantages: 
-#     - Simple, extension of familiar concept
-#   - Limitations: 
-#     - Very modest improvement in power
-#     - Will fail when you have limited studies
+
 
 m_1 <- metareg(ma_list$rcts_low, ~ design)
 
 
 # Model 2: Deterministic variance inflation----------------------------------- -
-#   - Advantages: 
-#     - Simple, 
-#     - Allows for rapid sensitivity analysis
-#     - Adds information not in the data (e.g. NRS are "too precise")
-#   - Limitations: 
-#     - Decreases overall power
-#     - No consideration of bias
+
 
 m_2 <- metagen(TE, seTE = se_w, sm = "OR", data = ex)
 
 
 
 # Model 3: Deterministic bias adjustment-------------------------------------- -
-#   - Advantages: 
-#     - Simple, 
-#     - Allows for rapid sensitivity analysis
-#     - Adds information not in the data (e.g. NRS are biased)
-#   - Limitations: 
-#     - Requires estimate of bias
+
 
 m_3 <- metagen(TE = te_bp, seTE, sm = "OR", data = ex)
 
 # Model 4: Deterministic bias and variance adjustment------------------------- -
-#   - Advantages: 
-#     - Simple
-#     - Allows for rapid sensitivity analysis
-#     - Adds information not in the data (e.g. NRS are biased and "too precise")
-#     - Some wiggle room if bias estimate is wrong
-#   - Limitations: 
-#     - Requires estimate of bias
+
 
 m_4 <- metagen(TE = te_bi, seTE = se_w, sm = "OR", data = ex)
 
 
 # Model 5: Three-level model-------------------------------------------------- -
-#   - Advantages: 
-#     - 
-#   - Limitations: 
-#     - 
+
 
 # Uses variance instead of standard error
 m_5 <- rma.mv(TE, var, random = ~ 1 | design/study_id, data= ex)
 
 # Model 6: Three-level with viariance inflation------------------------------- -
-#   - Advantages: 
-#     - 
-#   - Limitations: 
-#     -
+
 
 m_6 <- rma.mv(TE, var_w, random = ~ 1 | design/study_id, data= ex)
 
 
 # Model 7: Three-level with bias adjustment------------------------------- -
-#   - Advantages: 
-#     - 
-#   - Limitations: 
-#     -
 
 m_7 <- rma.mv(te_bi, var_w, random = ~ 1 | design/study_id, data= ex)
 

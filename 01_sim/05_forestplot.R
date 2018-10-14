@@ -3,6 +3,7 @@ source("./01_sim/04_bayes_models.R")
 library(tidybayes)
 library(forestplot)
 
+#Create a list of results to iterate over
 models <- list(rcts = ma_list$rcts,
                all = ma_list$rcts_low, 
                metareg = m_1, 
@@ -15,6 +16,8 @@ models <- list(rcts = ma_list$rcts,
                bayes_bias = bayes_m1, 
                bayes_three_lvl_bias_var = bayes_m2)
 
+
+# Extract summary characteristics
 fp_data <- rep(list(NA), length(models))
 for(i in seq_along(fp_data)){
   
@@ -41,9 +44,10 @@ for(i in seq_along(fp_data)){
   }
 }
 
+#Flatten list
 fp_data <- do.call(rbind, fp_data)
 
-
+#Names of models
 model_names <- c("RCTs only", "All studies", "Meta-regression (m_1)",
                  "Variance inflation (m_2)", "Perfect Bias adjustment (m_3)",
                  "Imperfect bias adjustment with variance inflation (m_4)",
@@ -52,6 +56,8 @@ model_names <- c("RCTs only", "All studies", "Meta-regression (m_1)",
                  "3-level model with imperfect bias adjustment with variance inflation",
                  "Bayesian perfect uncertain bias adjustment",
                  "Bayesian 3-level with uncertain imperfect bias adjustment")
+
+#Table text
 tabletext <- cbind(c("Model",model_names),
                         c("Odds ratio (95% CI/CrI)",
                         paste(formatC(fp_data$TE, digits = 2, format = "f"), " (",
@@ -73,7 +79,6 @@ forestplot(tabletext,
            grid = c(0.53),
            graph.pos = 2,
            boxsize = 0.3,
-           mar = grid::unit(c(10,1,1,1), "mm"), #Increase bottom margin if "favours" clip
            vertices = FALSE,
            title = "Model Comparison",
            fn.ci_norm = forestplot::fpDrawCircleCI)

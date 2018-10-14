@@ -1,12 +1,17 @@
-# Turner model
+# Based on Turner model (https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2667303/)
 
+
+# Lower and upper should capture a 67% confidence interval, i.e. belief that
+# true bias adjustment is twice as likely to be in the interval than outside it
+# If any estimates fall on right side of line (upper or both upper and lower)
+# then take log(1/est) instead of log(est)
 # High quality obs trials
 
 lower_high = 0.8
 upper_high = 1
 
 u_high = (log(lower_high) + log(upper_high))/2
-sd_high = (log(upper_high) - log(lower_high))/2
+sd_high = (log(upper_high) - log(lower_high))/2 
 
 hist(rnorm(1000, u_high, sd_high))
 
