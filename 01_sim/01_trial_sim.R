@@ -1,3 +1,6 @@
+# install.packages(c("tidyverse", "reshape2", "meta", "metafor", "R2jags", "forestplot))
+
+
 library(tidyverse)
 library(reshape2)
 source("./03_functions/smdm_obs_functions.R")
